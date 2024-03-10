@@ -5819,6 +5819,14 @@ bool FurnaceGUI::loop() {
               MARK_MODIFIED;
               ImGui::CloseCurrentPopup();
             }
+            if (ImGui::Button("Sort Patterns by Order")) {
+              stop();
+              e->lockEngine([this]() {
+                e->curSubSong->sortOrders();
+              });
+              MARK_MODIFIED;
+              ImGui::CloseCurrentPopup();
+            }
             if (ImGui::Button("Remove unused instruments")) {
               stop();
               e->delUnusedIns();
