@@ -5822,7 +5822,9 @@ bool FurnaceGUI::loop() {
             if (ImGui::Button("Sort Patterns by Order")) {
               stop();
               e->lockEngine([this]() {
+                e->curSubSong->rearrangePatterns();
                 e->curSubSong->sortOrders();
+                // e->curSubSong->rearrangePatterns();
               });
               MARK_MODIFIED;
               ImGui::CloseCurrentPopup();

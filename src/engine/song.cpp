@@ -62,9 +62,13 @@ void DivSubSong::sortOrders() {
     logD("sorting channel %d...",i);
     std::vector<std::pair<int,int>> clearOuts=pat[i].sortByOrder(orders.ord[i]);
     for (auto& j: clearOuts) {
+      if(j.first==j.second) continue;
       for (int k=0; k<DIV_MAX_PATTERNS; k++) {
         if (orders.ord[i][k]==j.first) {
           orders.ord[i][k]=j.second;
+        }
+        else if (orders.ord[i][k]==j.second) {
+          orders.ord[i][k]=j.first;
         }
       }
     }

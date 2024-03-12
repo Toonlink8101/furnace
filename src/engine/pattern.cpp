@@ -77,16 +77,14 @@ std::vector<std::pair<int,int>> DivChannelData::rearrange() {
 
 std::vector<std::pair<int,int>> DivChannelData::sortByOrder(const unsigned char channelOrderArr[DIV_MAX_PATTERNS]){
   std::vector<std::pair<int,int>> ret;
-  // loop throught order
   for (int i=0; i<DIV_MAX_PATTERNS; i++) {
     unsigned char ordPat=channelOrderArr[i];
-    if (ordPat!=NULL && ordPat!=-1) {
-      // swap pattern at order with order of pattern
+    if (ordPat!=NULL) {
+      if(ordPat==0) continue;
       DivPattern* temp=data[ordPat];
       data[ordPat]=data[i];
       data[i]=temp;
-      // change order to match
-      logV("%d -> %d",ordPat,i);
+      logV("%d <-> %d",ordPat,i);
       ret.push_back(std::pair<int,int>(ordPat,i));
       if (++i>=DIV_MAX_PATTERNS) break;
     }

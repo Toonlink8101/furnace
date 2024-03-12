@@ -75,7 +75,7 @@ struct DivChannelData {
    * sorts pattern data by order.
    * not thread-safe! use a mutex!
    * @param channelOrder array of orders of the channel to be sorted
-   * @return a list of From -> To pairs
+   * @return a list of swapped pairs
    */
   std::vector<std::pair<int,int>> sortByOrder(const unsigned char channelOrderArr[DIV_MAX_PATTERNS]);
 
