@@ -5819,7 +5819,16 @@ bool FurnaceGUI::loop() {
               MARK_MODIFIED;
               ImGui::CloseCurrentPopup();
             }
-            if (ImGui::Button("Sort Patterns by Order")) {
+            if (ImGui::Button("Make patterns unique")) {
+              stop();
+              e->lockEngine([this]() {
+                e->curSubSong->makePatUnique();
+                e->curSubSong->rearrangePatterns();
+              });
+              MARK_MODIFIED;
+              ImGui::CloseCurrentPopup();
+            }
+            if (ImGui::Button("Sort patterns by order")) {
               stop();
               e->lockEngine([this]() {
                 e->curSubSong->rearrangePatterns();

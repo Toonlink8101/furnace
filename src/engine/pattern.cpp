@@ -92,6 +92,33 @@ std::vector<std::pair<int,int>> DivChannelData::sortByOrder(const unsigned char 
   return ret;
 }
 
+std::vector<std::pair<int,int>> DivChannelData::makePatsUnique(const unsigned char channelOrderArr[DIV_MAX_PATTERNS]){
+  std::vector<std::pair<int,int>> ret;
+  for (int i=0; i<DIV_MAX_PATTERNS; i++) {
+    if (data[i]==NULL) continue;
+    // find duplicates
+    for (int j=i+1; j<DIV_MAX_PATTERNS; j++) {
+      if (channelOrderArr[i]==channelOrderArr[j]) {
+        // find free slot
+        bool didNotFind = true;
+        for (int k=0; k<DIV_MAX_PATTERNS; k++) {
+          // logV("finding free slot in %d...",j);
+          if (data[k]==NULL) {
+            data[k]=data[i];
+            logV("order %d = %d",j,k);
+            ret.push_back(std::pair<int,int>(j,k));
+            didNotFind=false;
+            break;
+          }
+        }
+        // no free slot means all patterns are unique
+        if (didNotFind) return ret;
+      }
+    }
+  }
+  return ret;
+}
+
 void DivChannelData::wipePatterns() {
   for (int i=0; i<DIV_MAX_PATTERNS; i++) {
     if (data[i]!=NULL) {

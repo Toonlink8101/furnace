@@ -79,6 +79,13 @@ struct DivChannelData {
    */
   std::vector<std::pair<int,int>> sortByOrder(const unsigned char channelOrderArr[DIV_MAX_PATTERNS]);
 
+/**
+   * re-arrange NULLs.
+   * not thread-safe! use a mutex!
+   * @return a list changes to the order (order number, new pattern)
+   */
+  std::vector<std::pair<int,int>> makePatsUnique(const unsigned char channelOrderArr[DIV_MAX_PATTERNS]);
+
   /**
    * destroy all patterns on this DivChannelData.
    */

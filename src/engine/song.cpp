@@ -76,6 +76,13 @@ void DivSubSong::sortOrders() {
 }
 
 void DivSubSong::makePatUnique() {
+  for (int i=0; i<DIV_MAX_CHANS; i++) {
+    logD("re-arranging channel %d...",i);
+    std::vector<std::pair<int,int>> clearOuts=pat[i].makePatsUnique(orders.ord[i]);
+    for (auto& j: clearOuts) {
+      orders.ord[i][j.first]=j.second;
+    }
+  }
 }
 
 void DivSong::clearSongData() {
