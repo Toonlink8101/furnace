@@ -79,8 +79,7 @@ std::vector<std::pair<int,int>> DivChannelData::sortByOrder(const unsigned char 
   std::vector<std::pair<int,int>> ret;
   for (int i=0; i<DIV_MAX_PATTERNS; i++) {
     unsigned char ordPat=channelOrderArr[i];
-    if (ordPat!=NULL) {
-      if(ordPat==0) continue;
+    if (ordPat!=NULL && data[ordPat]!=NULL){
       DivPattern* temp=data[ordPat];
       data[ordPat]=data[i];
       data[i]=temp;
