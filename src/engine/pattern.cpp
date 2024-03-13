@@ -79,7 +79,7 @@ std::vector<std::pair<int,int>> DivChannelData::sortByOrder(const unsigned char 
   std::vector<std::pair<int,int>> ret;
   for (int i=0; i<DIV_MAX_PATTERNS; i++) {
     unsigned char ordPat=channelOrderArr[i];
-    if (ordPat!=NULL && data[ordPat]!=NULL){
+    if (getPattern(ordPat,false)!=NULL){
       DivPattern* temp=data[ordPat];
       data[ordPat]=data[i];
       data[i]=temp;
@@ -103,7 +103,7 @@ std::vector<std::pair<int,int>> DivChannelData::makePatsUnique(const unsigned ch
         for (int k=0; k<DIV_MAX_PATTERNS; k++) {
           // logV("finding free slot in %d...",j);
           if (data[k]==NULL) {
-            data[k]=data[i];
+            getPattern(i,false)->copyOn(getPattern(k,true));
             logV("order %d = %d",j,k);
             ret.push_back(std::pair<int,int>(j,k));
             didNotFind=false;
