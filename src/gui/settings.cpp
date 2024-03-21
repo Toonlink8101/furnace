@@ -1541,10 +1541,10 @@ void FurnaceGUI::drawSettings() {
           ImGui::Text("YM2612");
           ImGui::TableNextColumn();
           ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x);
-          if (ImGui::Combo("##YM2612Core",&settings.ym2612Core,ym2612Cores,2)) settingsChanged=true;
+          if (ImGui::Combo("##YM2612Core",&settings.ym2612Core,ym2612Cores,3)) settingsChanged=true;
           ImGui::TableNextColumn();
           ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x);
-          if (ImGui::Combo("##YM2612CoreRender",&settings.ym2612CoreRender,ym2612Cores,2)) settingsChanged=true;
+          if (ImGui::Combo("##YM2612CoreRender",&settings.ym2612CoreRender,ym2612Cores,3)) settingsChanged=true;
 
           ImGui::TableNextRow();
           ImGui::TableNextColumn();
@@ -2422,6 +2422,18 @@ void FurnaceGUI::drawSettings() {
           settingsChanged=true;
         }
         ImGui::Unindent();
+
+        if (settings.cursorFollowsWheel) {
+          ImGui::Text("How many steps to move with each scroll wheel step?");
+          if (ImGui::RadioButton("One##cws0",settings.cursorWheelStep==0)) {
+            settings.cursorWheelStep=0;
+            settingsChanged=true;
+          }
+          if (ImGui::RadioButton("Edit Step##cws1",settings.cursorWheelStep==1)) {
+            settings.cursorWheelStep=1;
+            settingsChanged=true;
+          }
+        }
 
         // SUBSECTION ASSETS
         CONFIG_SUBSECTION("Assets");
@@ -3551,6 +3563,9 @@ void FurnaceGUI::drawSettings() {
           UI_COLOR_CONFIG(GUI_COLOR_INSTR_POWERNOISE,"PowerNoise (noise)");
           UI_COLOR_CONFIG(GUI_COLOR_INSTR_POWERNOISE_SLOPE,"PowerNoise (slope)");
           UI_COLOR_CONFIG(GUI_COLOR_INSTR_DAVE,"Dave");
+          UI_COLOR_CONFIG(GUI_COLOR_INSTR_NDS,"NDS");
+          UI_COLOR_CONFIG(GUI_COLOR_INSTR_GBA_DMA,"GBA DMA");
+          UI_COLOR_CONFIG(GUI_COLOR_INSTR_GBA_MINMOD,"GBA MinMod");
           UI_COLOR_CONFIG(GUI_COLOR_INSTR_UNKNOWN,"Other/Unknown");
           ImGui::TreePop();
         }
@@ -3685,6 +3700,7 @@ void FurnaceGUI::drawSettings() {
         }
         if (ImGui::TreeNode("Memory Composition")) {
           UI_COLOR_CONFIG(GUI_COLOR_MEMORY_BG,"Background");
+          UI_COLOR_CONFIG(GUI_COLOR_MEMORY_DATA,"Waveform data");
           UI_COLOR_CONFIG(GUI_COLOR_MEMORY_FREE,"Unknown");
           //UI_COLOR_CONFIG(GUI_COLOR_MEMORY_PADDING,"");
           UI_COLOR_CONFIG(GUI_COLOR_MEMORY_RESERVED,"Reserved");
@@ -3695,6 +3711,8 @@ void FurnaceGUI::drawSettings() {
           UI_COLOR_CONFIG(GUI_COLOR_MEMORY_WAVE_RAM,"Wave RAM");
           UI_COLOR_CONFIG(GUI_COLOR_MEMORY_WAVE_STATIC,"Wavetable (static)");
           UI_COLOR_CONFIG(GUI_COLOR_MEMORY_ECHO,"Echo buffer");
+          UI_COLOR_CONFIG(GUI_COLOR_MEMORY_N163_LOAD,"Namco 163 load pos");
+          UI_COLOR_CONFIG(GUI_COLOR_MEMORY_N163_PLAY,"Namco 163 play pos");
           UI_COLOR_CONFIG(GUI_COLOR_MEMORY_BANK0,"Sample (bank 0)");
           UI_COLOR_CONFIG(GUI_COLOR_MEMORY_BANK1,"Sample (bank 1)");
           UI_COLOR_CONFIG(GUI_COLOR_MEMORY_BANK2,"Sample (bank 2)");
@@ -3986,6 +4004,7 @@ void FurnaceGUI::readConfig(DivConfig& conf, FurnaceGUISettingGroups groups) {
     settings.insertBehavior=conf.getInt("insertBehavior",1);
     settings.pullDeleteRow=conf.getInt("pullDeleteRow",1);
     settings.cursorFollowsWheel=conf.getInt("cursorFollowsWheel",0);
+    settings.cursorWheelStep=conf.getInt("cursorWheelStep",0);
     settings.removeInsOff=conf.getInt("removeInsOff",0);
     settings.removeVolOff=conf.getInt("removeVolOff",0);
     settings.insTypeMenu=conf.getInt("insTypeMenu",1);
@@ -4317,6 +4336,7 @@ void FurnaceGUI::readConfig(DivConfig& conf, FurnaceGUISettingGroups groups) {
   clampSetting(settings.playbackTime,0,1);
   clampSetting(settings.shaderOsc,0,1);
   clampSetting(settings.oscLineSize,0.25f,16.0f);
+  clampSetting(settings.cursorWheelStep,0,1);
 
   if (settings.exportLoops<0.0) settings.exportLoops=0.0;
   if (settings.exportFadeOut<0.0) settings.exportFadeOut=0.0;  
@@ -4456,6 +4476,7 @@ void FurnaceGUI::writeConfig(DivConfig& conf, FurnaceGUISettingGroups groups) {
     conf.set("insertBehavior",settings.insertBehavior);
     conf.set("pullDeleteRow",settings.pullDeleteRow);
     conf.set("cursorFollowsWheel",settings.cursorFollowsWheel);
+    conf.set("cursorWheelStep",settings.cursorWheelStep);
     conf.set("removeInsOff",settings.removeInsOff);
     conf.set("removeVolOff",settings.removeVolOff);
     conf.set("insTypeMenu",settings.insTypeMenu);
@@ -5629,7 +5650,6 @@ void FurnaceGUI::applyUISettings(bool updateFonts) {
   ImGuiFileDialog::Instance()->SetFileStyle(IGFD_FileStyleByExtension,".fur",uiColors[GUI_COLOR_FILE_SONG_NATIVE],ICON_FA_FILE);
   ImGuiFileDialog::Instance()->SetFileStyle(IGFD_FileStyleByExtension,".fui",uiColors[GUI_COLOR_FILE_INSTR],ICON_FA_FILE);
   ImGuiFileDialog::Instance()->SetFileStyle(IGFD_FileStyleByExtension,".fuw",uiColors[GUI_COLOR_FILE_WAVE],ICON_FA_FILE);
-  ImGuiFileDialog::Instance()->SetFileStyle(IGFD_FileStyleByExtension,".dmf",uiColors[GUI_COLOR_FILE_SONG_NATIVE],ICON_FA_FILE);
   ImGuiFileDialog::Instance()->SetFileStyle(IGFD_FileStyleByExtension,".dmp",uiColors[GUI_COLOR_FILE_INSTR],ICON_FA_FILE);
   ImGuiFileDialog::Instance()->SetFileStyle(IGFD_FileStyleByExtension,".dmw",uiColors[GUI_COLOR_FILE_WAVE],ICON_FA_FILE);
   ImGuiFileDialog::Instance()->SetFileStyle(IGFD_FileStyleByExtension,".wav",uiColors[GUI_COLOR_FILE_AUDIO],ICON_FA_FILE_AUDIO_O);
@@ -5645,12 +5665,18 @@ void FurnaceGUI::applyUISettings(bool updateFonts) {
   ImGuiFileDialog::Instance()->SetFileStyle(IGFD_FileStyleByExtension,".pcf",uiColors[GUI_COLOR_FILE_FONT],ICON_FA_FONT);
   ImGuiFileDialog::Instance()->SetFileStyle(IGFD_FileStyleByExtension,".psf",uiColors[GUI_COLOR_FILE_FONT],ICON_FA_FONT);
 
+  ImGuiFileDialog::Instance()->SetFileStyle(IGFD_FileStyleByExtension,".dmf",uiColors[GUI_COLOR_FILE_SONG_IMPORT],ICON_FA_FILE);
   ImGuiFileDialog::Instance()->SetFileStyle(IGFD_FileStyleByExtension,".mod",uiColors[GUI_COLOR_FILE_SONG_IMPORT],ICON_FA_FILE);
   ImGuiFileDialog::Instance()->SetFileStyle(IGFD_FileStyleByExtension,".fc13",uiColors[GUI_COLOR_FILE_SONG_IMPORT],ICON_FA_FILE);
   ImGuiFileDialog::Instance()->SetFileStyle(IGFD_FileStyleByExtension,".fc14",uiColors[GUI_COLOR_FILE_SONG_IMPORT],ICON_FA_FILE);
   ImGuiFileDialog::Instance()->SetFileStyle(IGFD_FileStyleByExtension,".fc",uiColors[GUI_COLOR_FILE_SONG_IMPORT],ICON_FA_FILE);
   ImGuiFileDialog::Instance()->SetFileStyle(IGFD_FileStyleByExtension,".smod",uiColors[GUI_COLOR_FILE_SONG_IMPORT],ICON_FA_FILE);
   ImGuiFileDialog::Instance()->SetFileStyle(IGFD_FileStyleByExtension,".ftm",uiColors[GUI_COLOR_FILE_SONG_IMPORT],ICON_FA_FILE);
+  ImGuiFileDialog::Instance()->SetFileStyle(IGFD_FileStyleByExtension,".0cc",uiColors[GUI_COLOR_FILE_SONG_IMPORT],ICON_FA_FILE);
+  ImGuiFileDialog::Instance()->SetFileStyle(IGFD_FileStyleByExtension,".dnm",uiColors[GUI_COLOR_FILE_SONG_IMPORT],ICON_FA_FILE);
+  ImGuiFileDialog::Instance()->SetFileStyle(IGFD_FileStyleByExtension,".eft",uiColors[GUI_COLOR_FILE_SONG_IMPORT],ICON_FA_FILE);
+
+  ImGuiFileDialog::Instance()->SetFileStyle(IGFD_FileStyleByExtension,".fub",uiColors[GUI_COLOR_FILE_SONG_IMPORT],ICON_FA_FILE);
 
   ImGuiFileDialog::Instance()->SetFileStyle(IGFD_FileStyleByExtension,".tfi",uiColors[GUI_COLOR_FILE_INSTR],ICON_FA_FILE);
   ImGuiFileDialog::Instance()->SetFileStyle(IGFD_FileStyleByExtension,".vgi",uiColors[GUI_COLOR_FILE_INSTR],ICON_FA_FILE);
